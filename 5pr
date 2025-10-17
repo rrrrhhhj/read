@@ -1,0 +1,100 @@
+#include <iostream>
+#include <cmath>
+#include <cstdlib>
+#include <ctime>
+
+using namespace std;
+
+const int N = 5;
+const int M = 5;
+
+// Подсчёт планет
+int countPlanets(char sector[N][M]) {
+    int count = 0;
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < M; j++) {
+            if (sector[i][j] == 'O') {
+                count++;
+            }
+        }
+    }
+    return count;
+}
+
+// Поиск ближайшей планеты к чёрной дыре
+void findClosestPlanet(char sector[N][M]) {
+    int blackHoleX = -1, blackHoleY = -1;
+    // Найти чёрную дыру
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < M; j++) {
+            if (sector[i][j] == 'X') {
+                blackHoleX = i;
+                blackHoleY = j;
+                break;
+            }
+        }
+        if (blackHoleX != -1) break;
+    }
+
+    if (blackHoleX == -1) {
+        cout << "Чёрная дыра не найдена.\n";
+        return;
+    }
+
+    double minDistance = 1e9;
+    int closestX = -1, closestY = -1;
+
+    // Считаем расстояние до всех планет
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < M; j++) {
+            if (sector[i][j] == 'O') {
+                double distance = sqrt(pow(i - blackHoleX, 2) + pow(j - blackHoleY, 2));
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestX = i;
+                    closestY = j;
+                }
+            }
+        }
+    }
+
+    if (closestX != -1) {
+        cout << "Ближайшая планета к чёрной дыре находится в (" 
+             << closestX << ", " << closestY << ")\n";
+        cout << "Расстояние: " << fixed << setprecision(2) << minDistance << endl;
+    } else {
+        cout << "Планеты не найдены.\n";
+    }
+}
+
+int main() {
+    srand(time(0));
+
+    char sector[N][M];
+
+    // Заполнение карты случайными символами
+    char symbols[3] = {'*', 'O', 'X'};
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < M; j++) {
+            sector[i][j] = symbols[rand() % 3];
+        }
+    }
+
+    // Вывод карты
+    cout << "Карта звёздного сектора:\n";
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < M; j++) {
+            cout << sector[i][j] << " ";
+        }
+        cout << endl;
+    }
+
+    // Подсчёт планет
+    int planetCount = countPlanets(sector);
+    cout << "Количество планет: " << planetCount << endl;
+
+    // Поиск ближайшей планеты
+    findClosestPlanet(sector);
+
+    return 0;
+}
