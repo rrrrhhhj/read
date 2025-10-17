@@ -1,0 +1,262 @@
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+struct Section {
+    string name;
+    int capacity;
+};
+
+struct Module {
+    string name;
+    int mass;
+    string type;
+    Section* sections = nullptr;
+    int sectionCount = 0;
+};
+
+// Добавление модуля: создаем новый массив модулей, копируем старый + новый модуль
+void addModule(Module*& modules, int& count) {
+    Module newModule;
+    cout << "Введите название модуля: ";
+    getline(cin, newModule.name);
+    cout << "Введите массу модуля (тонн): ";
+    cin >> newModule.mass;
+    cin.ignore();
+    cout << "Введите тип модуля (жилой, энергетический, научный и т.д.): ";
+    getline(cin, newModule.type);
+    newModule.sections = nullptr;
+    newModule.sectionCount = 0;
+
+    Module* temp = new Module[count + 1];
+    for (int i = 0; i < count; i++) {
+        temp[i] = modules[i];
+    }
+    temp[count] = newModule;
+
+    delete[] modules;
+    modules = temp;
+    count++;
+    cout << "Модуль добавлен.\n";
+}
+
+// Удаление модуля по индексу
+void removeModule(Module*& modules, int& count) {
+    if (count == 0) {
+        cout << "Нет модулей для удаления.\n";
+        return;
+    }
+    cout << "Введите индекс модуля для удаления (0-" << count-1 << "): ";
+    int index;
+    cin >> index;
+    cin.ignore();
+    if (index < 0 || index >= count) {
+        cout << "Неверный индекс.\n";
+        return;
+    }
+    // Сначала освобождаем память под секции модуля
+    delete[] modules[index].sections;
+
+    Module* temp = new Module[count - 1];
+    for (int i = 0, j = 0; i < count; i++) {
+        if (i != index) {
+            temp[j++] = modules[i];
+        }
+    }
+    delete[] modules;
+    modules = temp;
+    count--;
+    cout << "Модуль удалён.\n";
+}
+
+// Показать все модули и их отсеки
+void showModules(Module* modules, int count) {
+    if (count == 0) {
+        cout << "Нет модулей для отображения.\n";
+        return;
+    }
+    for (int i = 0; i < count; i++) {
+        cout << i << ". Модуль: " << modules[i].name << ", масса: " << modules[i].mass
+             << ", тип: " << modules[i].type << "\n";
+        cout << "  Отсеки (" << modules[i].sectionCount << "):\n";
+        for (int j = 0; j < modules[i].sectionCount; j++) {
+            cout << "    " << j << ". " << modules[i].sections[j].name << " (вместимость: "
+                 << modules[i].sections[j].capacity << ")\n";
+        }
+    }
+}
+
+// Добавить отсек в модуль
+void addSection(Module* modules, int count) {
+    if (count == 0) {
+        cout << "Нет модулей для добавления отсеков.\n";
+        return;
+    }
+    cout << "Введите индекс модуля для добавления отсека (0-" << count-1 << "): ";
+    int mIndex;
+    cin >> mIndex;
+    cin.ignore();
+    if (mIndex < 0 || mIndex >= count) {
+        cout << "Неверный индекс модуля.\n";
+        return;
+    }
+    Section newSection;
+    cout << "Введите название отсека: ";
+    getline(cin, newSection.name);
+    cout << "Введите вместимость отсека: ";
+    cin >> newSection.capacity;
+    cin.ignore();
+
+    Module& mod = modules[mIndex];
+    Section* temp = new Section[mod.sectionCount + 1];
+    for (int i = 0; i < mod.sectionCount; i++) {
+        temp[i] = mod.sections[i];
+    }
+    temp[mod.sectionCount] = newSection;
+    delete[] mod.sections;
+    mod.sections = temp;
+    mod.sectionCount++;
+    cout << "Отсек добавлен.\n";
+}
+
+// Удалить отсек из модуля
+void removeSection(Module* modules, int count) {
+    if (count == 0) {
+        cout << "Нет модулей для удаления отсеков.\n";
+        return;
+    }
+    cout << "Введите индекс модуля для удаления отсека (0-" << count-1 << "): ";
+    int mIndex;
+    cin >> mIndex;
+    cin.ignore();
+    if (mIndex < 0 || mIndex >= count) {
+        cout << "Неверный индекс модуля.\n";
+        return;
+    }
+    Module& mod = modules[mIndex];
+    if (mod.sectionCount == 0) {
+        cout << "В модуле нет отсеков для удаления.\n";
+        return;
+    }
+    cout << "Введите индекс отсека для удаления (0-" << mod.sectionCount - 1 << "): ";
+    int sIndex;
+    cin >> sIndex;
+    cin.ignore();
+    if (sIndex < 0 || sIndex >= mod.sectionCount) {
+        cout << "Неверный индекс отсека.\n";
+        return;
+    }
+    Section* temp = new Section[mod.sectionCount - 1];
+    for (int i = 0, j = 0; i < mod.sectionCount; i++) {
+        if (i != sIndex) {
+            temp[j++] = mod.sections[i];
+        }
+    }
+    delete[] mod.sections;
+    mod.sections = temp;
+    mod.sectionCount--;
+    cout << "Отсек удалён.\n";
+}
+
+// Найти самый тяжелый модуль
+void findHeaviestModule(Module* modules, int count) {
+    if (count == 0) {
+        cout << "Нет модулей для поиска.\n";
+        return;
+    }
+    int maxIndex = 0;
+    for (int i = 1; i < count; i++) {
+        if (modules[i].mass > modules[maxIndex].mass) {
+            maxIndex = i;
+        }
+    }
+    cout << "Самый тяжелый модуль: " << modules[maxIndex].name
+         << " (масса: " << modules[maxIndex].mass << " тонн)\n";
+}
+
+// Найти самый вместительный отсек на всей станции
+void findBiggestSection(Module* modules, int count) {
+    if (count == 0) {
+        cout << "Нет модулей для поиска отсеков.\n";
+        return;
+    }
+    int maxCapacity = -1;
+    string moduleName = "";
+    string sectionName = "";
+    bool found = false;
+    for (int i = 0; i < count; i++) {
+        for (int j = 0; j < modules[i].sectionCount; j++) {
+            if (modules[i].sections[j].capacity > maxCapacity) {
+                maxCapacity = modules[i].sections[j].capacity;
+                moduleName = modules[i].name;
+                sectionName = modules[i].sections[j].name;
+                found = true;
+            }
+        }
+    }
+    if (found) {
+        cout << "Самый вместительный отсек: " << sectionName << " в модуле " << moduleName
+             << " (вместимость: " << maxCapacity << ")\n";
+    } else {
+        cout << "Нет отсеков для поиска.\n";
+    }
+}
+
+int main() {
+    Module* modules = nullptr;
+    int moduleCount = 0;
+
+    while (true) {
+        cout << "\nМеню:\n"
+             << "1. Добавить модуль\n"
+             << "2. Удалить модуль\n"
+             << "3. Показать список модулей\n"
+             << "4. Добавить отсек в модуль\n"
+             << "5. Удалить отсек из модуля\n"
+             << "6. Найти самый тяжёлый модуль\n"
+             << "7. Найти самый вместительный отсек\n"
+             << "8. Выход\n"
+             << "Выберите действие: ";
+        int choice;
+        cin >> choice;
+        cin.ignore();
+
+        switch (choice) {
+            case 1:
+                addModule(modules, moduleCount);
+                break;
+            case 2:
+                removeModule(modules, moduleCount);
+                break;
+            case 3:
+                showModules(modules, moduleCount);
+                break;
+            case 4:
+                addSection(modules, moduleCount);
+                break;
+            case 5:
+                removeSection(modules, moduleCount);
+                break;
+            case 6:
+                findHeaviestModule(modules, moduleCount);
+                break;
+            case 7:
+                findBiggestSection(modules, moduleCount);
+                break;
+            case 8:
+                cout << "Выход из программы.\n";
+                // Освободим память перед выходом
+                for (int i = 0; i < moduleCount; i++) {
+                    delete[] modules[i].sections;
+                }
+                delete[] modules;
+                return 0;
+            default:
+                cout << "Неверный выбор. Попробуйте снова.\n";
+                break;
+        }
+    }
+
+    return 0;
+}
