@@ -1,0 +1,63 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+int main() {
+    setlocale(LC_ALL, "Russian");
+
+    string name;
+    int age;
+    bool hasSwordLicense;
+    bool hasArmor;
+    int power;
+
+    cout << "Введите ваше имя: ";
+    cin >> name;
+
+    cout << "Введите ваш возраст: ";
+    cin >> age;
+
+    cout << "Есть ли у вас лицензия на меч? (1 - да, 0 - нет): ";
+    cin >> hasSwordLicense;
+
+    cout << "Есть ли у вас броня? (1 - да, 0 - нет): ";
+    cin >> hasArmor;
+
+    cout << "Введите уровень вашей силы (1-100): ";
+    cin >> power;
+
+    // Проверка допуска
+    if ((age > 18 && hasSwordLicense) || hasArmor) {
+        cout << name << ", вы допущены к бою с драконом!" << endl;
+
+        // Исход боя
+        if (power <= 30) {
+            cout << "Вы проиграли дракону!" << endl;
+        } else if (power <= 60) {
+            cout << "Вы сражались достойно, но дракон улетел!" << endl;
+        } else {
+            cout << "Поздравляем! Вы победили дракона!" << endl;
+        }
+
+        // Подсчет очков
+        int heroPoints = age / 2 + power + (hasArmor ? 20 : 0) + (hasSwordLicense ? 10 : 0);
+
+        // Определение титула
+        string title;
+        if (heroPoints <= 50) {
+            title = "Новичок";
+        } else if (heroPoints <= 100) {
+            title = "Рыцарь";
+        } else {
+            title = "Легендарный герой";
+        }
+
+        cout << "Ваши очки героя: " << heroPoints << endl;
+        cout << "Ваш титул: " << title << endl;
+
+    } else {
+        cout << name << ", вы слишком слабы и не можете участвовать в бою!" << endl;
+    }
+
+    return 0;
+}
