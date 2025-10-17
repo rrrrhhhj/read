@@ -1,0 +1,119 @@
+#include <iostream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+// Структура предмета
+struct Item {
+    string name;
+    string type;
+    int value;
+
+    // Конструктор
+    Item(string n, string t, int v) {
+        name = n;
+        type = t;
+        value = v;
+    }
+
+    // Метод вывода
+    string toString() const {
+        return name + " (тип: " + type + ", ценность: " + to_string(value) + ")";
+    }
+};
+
+// Структура инвентаря
+struct Inventory {
+    vector<Item> items;
+
+    // Добавить предмет
+    void addItem(const Item& item) {
+        items.push_back(item);
+        cout << "Предмет добавлен!\n";
+    }
+
+    // Показать предметы
+    void showItems() {
+        if (items.empty()) {
+            cout << "Инвентарь пуст.\n";
+            return;
+        }
+
+        cout << "Ваш инвентарь:\n";
+        for (size_t i = 0; i < items.size(); i++) {
+            cout << i + 1 << ". " << items[i].toString() << endl;
+        }
+    }
+
+    // Удалить предмет по индексу
+    void removeItem(int index) {
+        if (index < 1 || index > items.size()) {
+            cout << "Неверный номер предмета.\n";
+            return;
+        }
+
+        items.erase(items.begin() + index - 1);
+        cout << "Предмет удалён.\n";
+    }
+};
+
+int main() {
+    setlocale(LC_ALL, "ru");
+
+    Inventory inventory;
+    int choice;
+
+    do {
+        cout << "\nМеню:\n";
+        cout << "1 - Добавить предмет\n";
+        cout << "2 - Показать инвентарь\n";
+        cout << "3 - Удалить предмет\n";
+        cout << "0 - Выйти\n";
+        cout << "Ваш выбор: ";
+        cin >> choice;
+
+        cin.ignore(); // очистка буфера
+
+        switch (choice) {
+            case 1: {
+                string name, type;
+                int value;
+
+                cout << "Введите название предмета: ";
+                getline(cin, name);
+                cout << "Введите тип предмета (оружие/зелье/броня/и т.д.): ";
+                getline(cin, type);
+                cout << "Введите ценность предмета: ";
+                cin >> value;
+
+                Item newItem(name, type, value);
+                inventory.addItem(newItem);
+                break;
+            }
+            case 2:
+                inventory.showItems();
+                break;
+
+            case 3: {
+                inventory.showItems();
+                if (!inventory.items.empty()) {
+                    int index;
+                    cout << "Введите номер предмета для удаления: ";
+                    cin >> index;
+                    inventory.removeItem(index);
+                }
+                break;
+            }
+            case 0:
+                cout << "Выход из программы.\n";
+                break;
+
+            default:
+                cout << "Некорректный ввод. Попробуйте снова.\n";
+        }
+
+    } while (choice != 0);
+
+    return 0;
+}
