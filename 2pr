@@ -1,0 +1,108 @@
+#include <iostream>
+#include <string>
+#include <random>
+#include <ctime>
+
+using namespace std;
+
+// Повышение уровня
+void levelUp(int hero[]) {
+    if (hero[1] >= 100) {
+        hero[2] += 1;
+        hero[1] = 0;
+        hero[3] += 5;
+        cout << "Уровень повышен! Новый уровень: " << hero[2] << endl;
+    }
+}
+
+// Атака героя
+void attack(int hero[], int &monsterHP, mt19937 &rng) {
+    int damage = hero[3] + (rng() % 6); // base + [0..5]
+    monsterHP -= damage;
+    cout << "Герой наносит " << damage << " урона монстру!" << endl;
+}
+
+// Лечение героя
+void heal(int hero[], mt19937 &rng) {
+    int healAmount = 10 + (rng() % 21); // [10..30]
+    hero[0] += healAmount;
+    cout << "Герой лечится на " << healAmount << " HP." << endl;
+}
+
+// Атака монстра
+void monsterAttack(int hero[], int monsterAttack, mt19937 &rng) {
+    int damage = monsterAttack + (rng() % 4); // + [0..3]
+    hero[0] -= damage;
+    cout << "Монстр атакует и наносит " << damage << " урона!" << endl;
+}
+
+int main() {
+    setlocale(LC_ALL, "ru");
+
+    // Генератор случайных чисел
+    mt19937 rng(static_cast<unsigned int>(time(0)));
+
+    // hero[0] — HP, [1] — XP, [2] — LVL, [3] — атака
+    int hero[4] = {100, 0, 1, 15};
+
+    for (int round = 1; round <= 3; round++) {
+        int monsterHP = 15 + round * 10;
+        int monsterAttackPower = 5 + round * 3;
+
+        cout << "Раунд " << round << ". Появился монстр! HP: " << monsterHP << ", Урон: " << monsterAttackPower << endl;
+
+        while (hero[0] > 0 && monsterHP > 0) {
+            cout << "\nГерой: HP=" << hero[0] << ", XP=" << hero[1] << ", LVL=" << hero[2] << endl;
+            cout << "Выберите действие (1 - атаковать, 2 - лечиться, 3 - убежать): ";
+
+            int action;
+            cin >> action;
+
+            switch (action) {
+                case 1:
+                    attack(hero, monsterHP, rng);
+                    break;
+                case 2:
+                    heal(hero, rng);
+                    break;
+                case 3:
+                    if (rng() % 2 == 0) {
+                        cout << "Вы успешно убежали от монстра!\n";
+                        monsterHP = 0; // как будто бой закончен
+                    } else {
+                        cout << "Не удалось убежать!\n";
+                    }
+                    break;
+                default:
+                    cout << "Неверный выбор. Попробуйте снова.\n";
+                    continue;
+            }
+
+            // Если монстр ещё жив, он атакует
+            if (monsterHP > 0 && hero[0] > 0 && action != 3) {
+                monsterAttack(hero, monsterAttackPower, rng);
+            }
+        }
+
+        // Проверка на смерть героя
+        if (hero[0] <= 0) {
+            cout << "Герой пал в бою. Игра окончена." << endl;
+            break;
+        }
+
+        if (monsterHP <= 0) {
+            cout << "Монстр побеждён! Герой получает 20 XP.\n";
+            hero[1] += 20;
+            levelUp(hero);
+        }
+
+        cout << "Раунд " << round << " завершён.\n\n";
+    }
+
+    if (hero[0] > 0) {
+        cout << "Игра окончена. Герой выжил!\n";
+        cout << "Итог: HP = " << hero[0] << ", XP = " << hero[1] << ", LVL = " << hero[2] << endl;
+    }
+
+    return 0;
+}
