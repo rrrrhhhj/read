@@ -1,0 +1,75 @@
+#include <iostream>
+#include <ctime>
+#include <cstdlib>
+
+using namespace std;
+
+const int N = 5; // строки
+const int M = 5; // столбцы
+
+int main() {
+    srand(time(0)); // инициализация генератора случайных чисел
+
+    int matrix[N][M];
+
+    // Заполняем матрицу случайными числами от -100 до 100
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < M; j++) {
+            matrix[i][j] = rand() % 201 - 100; // от -100 до 100
+        }
+    }
+
+    // Вставляем агента (666) в случайную позицию
+    int agentRow = rand() % N;
+    int agentCol = rand() % M;
+    matrix[agentRow][agentCol] = 666;
+
+    // Выводим матрицу
+    cout << "Матрица:\n";
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < M; j++) {
+            cout << matrix[i][j] << "\t";
+        }
+        cout << endl;
+    }
+
+    // Поиск агента через указатели
+    int* ptr = &matrix[0][0];
+    int foundRow = -1, foundCol = -1;
+
+    for (int i = 0; i < N && foundRow == -1; i++) {
+        for (int j = 0; j < M; j++) {
+            int value = ((matrix + i) + j); // адресная арифметика
+            if (value == 666) {
+                foundRow = i;
+                foundCol = j;
+                break;
+            }
+        }
+    }
+
+    // Подсчёт заражённых соседей
+    int infected = 0;
+
+    if (foundRow != -1 && foundCol != -1) {
+        // сверху
+        if (foundRow > 0 && ((matrix + foundRow - 1) + foundCol) < 0)
+            infected++;
+        // снизу
+        if (foundRow < N - 1 && ((matrix + foundRow + 1) + foundCol) < 0)
+            infected++;
+        // слева
+        if (foundCol > 0 && ((matrix + foundRow) + foundCol - 1) < 0)
+            infected++;
+        // справа
+        if (foundCol < M - 1 && ((matrix + foundRow) + foundCol + 1) < 0)
+            infected++;
+
+        cout << "\nАгент найден в ячейке (" << foundRow << ", " << foundCol << ")\n";
+        cout << "Количество заражённых соседей: " << infected << endl;
+    } else {
+        cout << "Агент не найден." << endl;
+    }
+
+    return 0;
+}
